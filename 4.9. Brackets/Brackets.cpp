@@ -1,4 +1,13 @@
-﻿#include <iostream>
+﻿/*
+4.7. Скобочки (9)
+Найти количество правильных скобочных форм из скобок “(” и ”)” заданной глубины.
+Задаются два целых числа: N – число открывающих скобок (т.е. 2N – длина выражения) и k – глубина (1 ≤ k ≤ N ≤ 50).
+
+Автор: Нечаев Олег ПС-24
+Среда: MS VisualStudio cpp 20
+*/
+
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <vector>
@@ -11,7 +20,6 @@ struct Args
     std::string outputFileName;
 };
 
-// Используем long long для точного хранения больших чисел
 long long CountValidBrackets(int N, int k)
 {
     // Создаем таблицу dp размером (N+1) x (k+1), инициализированную нулями
@@ -29,7 +37,6 @@ long long CountValidBrackets(int N, int k)
         dp[i][0] = 0;
     }
 
-    // Заполнение таблицы dp
     for (int i = 1; i <= N; i++)
     {
         // Считаем формы с максимальной глубиной не более k

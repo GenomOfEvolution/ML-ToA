@@ -1,8 +1,8 @@
 @echo off
 
 set PROGRAM="%~1"
-set TEST_COUNT=0
-set PASSED_COUNT=0
+set TEST_COUNT=1
+set PASSED_COUNT=1
 
 :TEST_LOOP
 if not exist tests\input%TEST_COUNT%.txt (
