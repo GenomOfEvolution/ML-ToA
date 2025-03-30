@@ -1,3 +1,12 @@
+/*
+На шахматном поле расположены N черных шашек и одна белая дамка.
+Требуется написать программу, которая по заданному расположению шашек определяет,
+какое максимальное количество шашек может взять белая дамка за один ход.
+
+Автор: Нечаев Олег ПС-24
+Среда: MS VisualStudio 2022, cpp 20
+*/
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -16,10 +25,12 @@ enum FieldCell
     Empty = 0,
     Black = 1,
     Queen = 2,
+    Visited = 3,
 };
 
 const int FIELD_SIZE = 8;
 using Field = std::vector<std::vector<FieldCell>>;
+using Path = std::vector<std::pair<int, int>>;
 
 Field ReadField(std::istream& input, std::pair<int, int>& queenPosition)
 {
@@ -50,59 +61,43 @@ Field ReadField(std::istream& input, std::pair<int, int>& queenPosition)
     return result;
 }
 
-void DFS(const Field& field, int x, int y, int eaten, std::vector<std::pair<int, int>>& currentPath, std::vector<std::pair<int, int>>& bestPath)
+bool IsInBorder(std::pair<int, int> pos)
 {
-    int dx[] = { -1, -1, 1, 1 };
-    int dy[] = { -1, 1, -1, 1 };
+    return (pos.first >= 0 && pos.first < FIELD_SIZE) &&
+        (pos.second >= 0 && pos.second < FIELD_SIZE);
+}
 
-    for (int dir = 0; dir < 4; ++dir)
+
+
+void DFS(Field f, std::pair<int, int> queenPos, Path curPath, Path& bestPath)
+{
+    const int dx[] = { -1, -1, 1, 1 };
+    const int dy[] = { -1, 1, -1, 1 };
+
+    for (int i = 0; i < 4; i++)
     {
-        int nx = x + dx[dir];
-        int ny = y + dy[dir];
-
-        while (nx >= 0 && nx < FIELD_SIZE && ny >= 0 && ny < FIELD_SIZE)
+        for (int j = 2; j < 6; j++)
         {
-            if (field[nx][ny] == FieldCell::Black)
-            {
-                int nnx = nx + dx[dir];
-                int nny = ny + dy[dir];
+            std::pair<int, int> firstPos = queenPos;
+            int dPosX = dx[i] * j;
+            int dPosY = dy[i] * j;
+            std::pair<int, int> secondPos = { queenPos.first + dPosX, queenPos.second + dPosY };
 
-                if (nnx >= 0 && nnx < FIELD_SIZE && nny >= 0 && nny < FIELD_SIZE && field[nnx][nny] == FieldCell::Empty)
-                {
-                    Field newField = field;
-                    newField[x][y] = FieldCell::Empty;
-                    newField[nx][ny] = FieldCell::Empty;
-                    newField[nnx][nny] = FieldCell::Queen;
-
-                    currentPath.push_back({ nnx, nny });
-
-                    DFS(newField, nnx, nny, eaten + 1, currentPath, bestPath);
-
-                    currentPath.pop_back();
-                }
-                break;
-            }
-            nx += dx[dir];
-            ny += dy[dir];
+            
         }
-    }
-
-    if (eaten > bestPath.size())
-    {
-        bestPath = currentPath;
     }
 }
 
 int MaxEatenCheckers(const Field& f, const std::pair<int, int>& queenPosition, std::vector<std::pair<int, int>>& eatHistory)
 {
     int maxEaten = 0;
-    std::vector<std::pair<int, int>> currentPath;
-    std::vector<std::pair<int, int>> bestPath;
+    std::vector<std::pair<int, int>> currentPath = { queenPosition };
+    std::vector<std::pair<int, int>> bestPath = { queenPosition };
 
-    DFS(f, queenPosition.first, queenPosition.second, 0, currentPath, bestPath);
+    DFS(f, queenPosition, currentPath, bestPath);
 
     eatHistory = bestPath;
-    return (int)bestPath.size();
+    return (int)bestPath.size() - 1;
 }
 
 std::optional<Args> ParseArgs(int argc, char* argv[])
@@ -143,11 +138,10 @@ void Checkers(const Args& args)
     int maxEaten = MaxEatenCheckers(f, queenPosition, eatHistory);
 
     std::ofstream output(args.outputFileName);
-    output << eatHistory.size();
-    output << queenPosition.first << " " << queenPosition.second << "\n";
+    output << eatHistory.size() - 1 << "\n";
     for (const auto& move : eatHistory)
     {
-        std::cout << move.first << " " << move.second << "\n";
+        output << move.first + 1 << " " << move.second + 1<< "\n";
     }
 }
 
