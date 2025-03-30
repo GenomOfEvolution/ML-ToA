@@ -31,8 +31,9 @@ enum FieldCell
 const int FIELD_SIZE = 8;
 using Field = std::vector<std::vector<FieldCell>>;
 using Path = std::vector<std::pair<int, int>>;
+using Pos = std::pair<int, int>;
 
-Field ReadField(std::istream& input, std::pair<int, int>& queenPosition)
+Field ReadField(std::istream& input, Pos& queenPosition)
 {
     Field result(FIELD_SIZE, std::vector<FieldCell>(FIELD_SIZE, FieldCell::Empty));
 
@@ -61,30 +62,82 @@ Field ReadField(std::istream& input, std::pair<int, int>& queenPosition)
     return result;
 }
 
-bool IsInBorder(std::pair<int, int> pos)
+bool IsInBorder(Pos pos)
 {
     return (pos.first >= 0 && pos.first < FIELD_SIZE) &&
         (pos.second >= 0 && pos.second < FIELD_SIZE);
 }
 
+int CountCheckersOnDiagonal(const Field& f, Pos start, Pos end, Pos& firstBlackPos, int dx, int dy) 
+{
+    int result = 0;
+    int x = start.first;
+    int y = start.second;
+
+    while ((x != end.first || y != end.second)) 
+    {
+        if (f[x][y] == FieldCell::Black) 
+        {
+            result++;
 
 
-void DFS(Field f, std::pair<int, int> queenPos, Path curPath, Path& bestPath)
+            if (result == 1)
+            {
+                firstBlackPos = { x, y };
+            }
+        }
+
+        x += dx;
+        y += dy;
+    }
+
+    return result;
+}
+
+void DFS(Field f, Pos queenPos, Path curPath, Path& bestPath)
 {
     const int dx[] = { -1, -1, 1, 1 };
     const int dy[] = { -1, 1, -1, 1 };
 
     for (int i = 0; i < 4; i++)
     {
-        for (int j = 2; j < 6; j++)
+        for (int j = 1; j < 7; j++)
         {
-            std::pair<int, int> firstPos = queenPos;
+            Pos firstPos = queenPos;
             int dPosX = dx[i] * j;
             int dPosY = dy[i] * j;
-            std::pair<int, int> secondPos = { queenPos.first + dPosX, queenPos.second + dPosY };
+            Pos secondPos = { queenPos.first + dPosX, queenPos.second + dPosY };
 
+            if (!IsInBorder(secondPos))
+            {
+                break;
+            }
+
+            if (f[secondPos.first][secondPos.second] == Black)
+            {
+                continue;
+            }
             
+            Pos firstBlackPos;
+            int blacksOnDiagonal = CountCheckersOnDiagonal(f, firstPos, secondPos, firstBlackPos, dx[i], dy[i]);
+            if (blacksOnDiagonal == 1)
+            {
+                Field newField = f;
+                newField[secondPos.first][secondPos.second] = Queen;
+                newField[firstPos.first][firstPos.second] = Empty;
+                newField[firstBlackPos.first][firstBlackPos.second] = Empty;
+
+                curPath.push_back(secondPos);
+                DFS(newField, secondPos, curPath, bestPath);
+
+                curPath.pop_back();
+            }
         }
+    }
+
+    if (curPath.size() > bestPath.size())
+    {
+        bestPath = curPath;
     }
 }
 
@@ -97,7 +150,7 @@ int MaxEatenCheckers(const Field& f, const std::pair<int, int>& queenPosition, s
     DFS(f, queenPosition, currentPath, bestPath);
 
     eatHistory = bestPath;
-    return (int)bestPath.size() - 1;
+    return (bestPath.size() > 0) ? (int)bestPath.size() - 1 : 0;
 }
 
 std::optional<Args> ParseArgs(int argc, char* argv[])
