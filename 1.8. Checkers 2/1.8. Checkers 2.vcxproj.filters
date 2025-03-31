@@ -20,12 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="test.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
-    <Text Include="testOut.txt">
-      <Filter>Resource Files</Filter>
-    </Text>
     <Text Include="input4.txt">
       <Filter>Resource Files</Filter>
     </Text>
@@ -38,6 +32,8 @@
     <Text Include="output5.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="test0.txt" />
+    <Text Include="x64\Debug\myOut4.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
