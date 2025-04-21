@@ -94,7 +94,16 @@ int CountCheckersOnDiagonal(const Field& f, Pos start, Pos end, Pos& firstBlackP
     return result;
 }
 
-void DFS(Field f, Pos queenPos, Path curPath, Path& bestPath)
+bool IsOppositeDirection(int dx1, int dy1, int dx2, int dy2)
+{
+    if (dx1 == 0 || dx2 == 0 || dy1 == 0 || dy2 == 0)
+        return false;
+
+    return (dx1 == -dx2) && (dy1 == -dy2);
+}
+
+
+void DFS(Field f, Pos queenPos, Path curPath, Path& bestPath, int lastDx, int lastDy)
 {
     const int dx[] = { -1, -1, 1, 1 };
     const int dy[] = { -1, 1, -1, 1 };
@@ -120,7 +129,7 @@ void DFS(Field f, Pos queenPos, Path curPath, Path& bestPath)
             
             Pos firstBlackPos;
             int blacksOnDiagonal = CountCheckersOnDiagonal(f, firstPos, secondPos, firstBlackPos, dx[i], dy[i]);
-            if (blacksOnDiagonal == 1)
+            if (blacksOnDiagonal == 1 && !IsOppositeDirection(dx[i], dy[i], lastDx, lastDy))
             {
                 Field newField = f;
                 newField[secondPos.first][secondPos.second] = Queen;
@@ -128,7 +137,7 @@ void DFS(Field f, Pos queenPos, Path curPath, Path& bestPath)
                 newField[firstBlackPos.first][firstBlackPos.second] = Empty;
 
                 curPath.push_back(secondPos);
-                DFS(newField, secondPos, curPath, bestPath);
+                DFS(newField, secondPos, curPath, bestPath, dx[i], dy[i]);
 
                 curPath.pop_back();
             }
@@ -147,7 +156,7 @@ int MaxEatenCheckers(const Field& f, const std::pair<int, int>& queenPosition, s
     std::vector<std::pair<int, int>> currentPath = { queenPosition };
     std::vector<std::pair<int, int>> bestPath = { queenPosition };
 
-    DFS(f, queenPosition, currentPath, bestPath);
+    DFS(f, queenPosition, currentPath, bestPath, 0, 0);
 
     eatHistory = bestPath;
     return (bestPath.size() > 0) ? (int)bestPath.size() - 1 : 0;

@@ -138,9 +138,7 @@
     <Text Include="input5.txt" />
     <Text Include="output4.txt" />
     <Text Include="output5.txt" />
-    <Text Include="test.txt" />
-    <Text Include="test0.txt" />
-    <Text Include="testOut.txt" />
+    <Text Include="x64\Debug\myOut4.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
