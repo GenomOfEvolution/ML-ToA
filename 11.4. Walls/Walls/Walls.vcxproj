@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{b7d0c42a-882f-4921-89e9-cad9a3591cf6}</ProjectGuid>
-    <RootNamespace>My114Walls</RootNamespace>
+    <ProjectGuid>{a8885236-daf1-49b1-916d-90e4cbacba1a}</ProjectGuid>
+    <RootNamespace>Walls</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -132,6 +132,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Walls.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Walls.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
