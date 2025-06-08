@@ -40,30 +40,73 @@ std::ostream& operator<<(std::ostream& os, const Permutation& p)
     return os;
 }
 
-Permutation SolvePermutationEquation(const Permutation& A, const Permutation& B)
+
+Permutation InversePermutation(const Permutation& perm) 
 {
-    size_t n = A.size();
-    Permutation inverseA(n);
-    Permutation X(n);
+    int n = perm.size();
+    Permutation inverse(n);
 
     for (int i = 0; i < n; ++i) 
     {
-        inverseA[A[i] - 1] = i + 1;
+        inverse[perm[i] - 1] = i + 1;
     }
+
+    return inverse;
+}
+
+Permutation MultiplyPermutations(const Permutation& A, const Permutation& B) 
+{
+    int n = A.size();
+    Permutation result(n);
 
     for (int i = 0; i < n; ++i) 
     {
-        X[i] = inverseA[B[i] - 1];
+        result[i] = A[B[i] - 1];
     }
+
+    return result;
+}
+
+Permutation SolvePermutationEquation(const Permutation& A, const Permutation& B) 
+{
+    Permutation invA = InversePermutation(A);
+    Permutation X = MultiplyPermutations(B, invA);
 
     return X;
+}
+
+bool NextPermutation(Permutation& p)
+{
+    int n = (int)p.size();
+    int i = n - 2;
+
+    while (i >= 0 && p[i] >= p[i + 1])
+    {
+        i--;
+    }
+
+    if (i < 0)
+    {
+        return false; 
+    }
+
+    int j = n - 1;
+    while (p[j] <= p[i])
+    {
+        j--;
+    }
+
+    std::swap(p[i], p[j]);
+    std::reverse(p.begin() + i + 1, p.end());
+
+    return true;
 }
 
 void NextKPermutations(std::ostream& output, Permutation p, int K)
 {
     for (int i = 0; i < K; ++i) 
     {
-        if (!std::next_permutation(p.begin(), p.end())) 
+        if (!NextPermutation(p))
         {
             break;
         }
@@ -92,22 +135,22 @@ std::vector<int> PermToInversionVector(const Permutation& p)
 
 Permutation InversionVectorToPerm(const std::vector<int>& inv)
 {
-    int n = (int)inv.size();
-    Permutation perm;
-    Permutation numbers;
-
-    for (int i = 1; i <= n; ++i) 
+    size_t n = inv.size();
+    std::vector<int> availableNumbers(n);
+    for (int i = 0; i < n; ++i)
     {
-        numbers.push_back(i);
+        availableNumbers[i] = i + 1; 
     }
 
-    for (int i = n - 1; i >= 0; --i) 
+    Permutation p(n);
+    for (int i = (int)(n - 1); i >= 0; --i)
     {
-        perm.insert(perm.begin(), numbers[inv[i]]);
-        numbers.erase(numbers.begin() + inv[i]);
+        int pos = (int)availableNumbers.size() - 1 - inv[i];
+        p[i] = availableNumbers[pos];
+        availableNumbers.erase(availableNumbers.begin() + pos);
     }
 
-    return perm;
+    return p;
 }
 
 void JohnsonTrotter(std::ostream& output, int N)
@@ -160,32 +203,35 @@ void JohnsonTrotter(std::ostream& output, int N)
     }
 }
 
-void GeneratePermutationsRecursive(std::ostream& output, Permutation& perm, int n, int level) 
-{
-    if (level == n) 
-    {
+void GeneratePermutationRecursive(std::ostream& output, Permutation& perm, int n, bool moveRight) {
+    if (n == 1) {
         output << perm << "\n";
         return;
     }
 
-    GeneratePermutationsRecursive(output, perm, n, level + 1);
+    for (int i = 0; i < n; ++i) {
+        GeneratePermutationRecursive(output, perm, n - 1, !moveRight);
 
-    for (int i = level + 1; i < n; ++i) 
-    {
-        std::swap(perm[level], perm[i]);
-        GeneratePermutationsRecursive(output, perm, n, level + 1);
-        std::swap(perm[level], perm[i]);
+        if (i < n - 1) {  // Не делаем лишний своп на последнем шаге
+            if (moveRight) {
+                std::swap(perm[n - 1], perm[n - 2 - i]);
+            }
+            else {
+                std::swap(perm[0], perm[n - 1 - i]);
+            }
+            output << perm << "\n";  // Печатаем только после реального изменения
+        }
     }
 }
 
-void GenerateAllRecursive(std::ostream& output, int N)
+void GenerateAllRecursive(std::ostream& output, int N) 
 {
     Permutation p(N);
 
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; ++i)
     {
-        p[i] = i + 1;
+        p[i] = i + 1; 
     }
 
-    GeneratePermutationsRecursive(output, p, N, 0);
+    GeneratePermutationRecursive(output, p, N, true);
 }
