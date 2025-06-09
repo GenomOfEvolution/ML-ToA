@@ -203,35 +203,49 @@ void JohnsonTrotter(std::ostream& output, int N)
     }
 }
 
-void GeneratePermutationRecursive(std::ostream& output, Permutation& perm, int n, bool moveRight) {
-    if (n == 1) {
+
+void GeneratePerms(std::ostream& output, Permutation perm, int N, int num, bool isOddPerm)
+{
+    if (perm.size() == N)
+    {
         output << perm << "\n";
         return;
     }
 
-    for (int i = 0; i < n; ++i) {
-        GeneratePermutationRecursive(output, perm, n - 1, !moveRight);
-
-        if (i < n - 1) {  // Не делаем лишний своп на последнем шаге
-            if (moveRight) {
-                std::swap(perm[n - 1], perm[n - 2 - i]);
-            }
-            else {
-                std::swap(perm[0], perm[n - 1 - i]);
-            }
-            output << perm << "\n";  // Печатаем только после реального изменения
+    if (isOddPerm)
+    {
+        for (int i = perm.size(); i >= 0; i--)
+        {
+            Permutation p = perm;
+            p.insert(p.begin() + i, num);
+            GeneratePerms(output, p, N, num + 1, (i % 2 == 0) ? !isOddPerm : isOddPerm);
+        }
+    }
+    else
+    {
+        for (int i = 0; i <= perm.size(); i++)
+        {
+            Permutation p = perm;
+            p.insert(p.begin() + i, num);
+            GeneratePerms(output, p, N, num + 1, (i % 2 == 0) ? !isOddPerm : isOddPerm);
         }
     }
 }
 
-void GenerateAllRecursive(std::ostream& output, int N) 
+void GenerateAllRecursive(std::ostream& output, int N)
 {
-    Permutation p(N);
-
-    for (int i = 0; i < N; ++i)
+    if (N <= 0)
     {
-        p[i] = i + 1; 
+        return;
     }
 
-    GeneratePermutationRecursive(output, p, N, true);
+    Permutation perm = { 1 };
+
+    if (N == 1) 
+    {
+        output << perm << "\n"; 
+        return;
+    }
+
+    GeneratePerms(output, perm, N, 2, true);
 }
